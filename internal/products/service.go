@@ -4,6 +4,14 @@ package products
 type Service interface {
 	GetAll() ([]Product, error)
 	Store(name, category string, count int, price float64) (Product, error)
+	// Declaração do Método Update
+	Update(id int, name, productType string, count int, price float64) (Product, error)
+
+	// Declaração do Método UpdateName
+	UpdateName(id int, name string) (Product, error)
+
+	// Declaração do Método Delete
+	Delete(id int) error
 }
 
 // Declaração da Estrutura que contém um Repository
@@ -47,4 +55,26 @@ func (s *service) Store(name, category string, count int, price float64) (Produc
 	}
 
 	return product, nil
+}
+
+// Criação do Método Update
+func (s service) Update(id int, name, productType string, count int, price float64) (Product, error) {
+	product, err := s.repository.Update(id, name, productType, count, price)
+
+	return product, err
+}
+
+// Criação do Método UpdateName
+func (s service) UpdateName(id int, name string) (Product, error) {
+	product, err := s.repository.UpdateName(id, name)
+
+	return product, err
+
+}
+
+// Criação do Método Delete
+func (s service) Delete(id int) error {
+	err := s.repository.Delete(id)
+
+	return err
 }
