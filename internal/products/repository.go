@@ -1,6 +1,10 @@
 package products
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/anwardh/meliProject/pkg/store"
+)
 
 // Adicionando a Estrutura Product e seus campos rotulados
 type Product struct {
@@ -11,8 +15,11 @@ type Product struct {
 	Price    float64 `json:"price"`
 }
 
-/*Criação da variável para guardar os produtos
-  Corresponde a nossa Camada de Persistência de Dados */
+/*
+Criação da variável para guardar os produtos
+
+	Corresponde a nossa Camada de Persistência de Dados
+*/
 var ps []Product
 var lastID int
 
@@ -31,31 +38,83 @@ type Repository interface {
 	Delete(id int) error
 }
 
-type repository struct{}
+type repository struct {
+	db store.Store
+}
 
 // Função que retornará o repositório um ponteiro para o repositório
-func NewRepository() Repository {
-	return &repository{}
+func NewRepository(db store.Store) Repository {
+	return &repository{
+		// Aqui estamos passando o "trabalhador" para a repository, que é do tipo Store
+		db: db,
+	}
 }
 
 // Métodos que serão utilizados sobre a estrutura repository
 // quando for instanciada
 func (r *repository) GetAll() ([]Product, error) {
+	var ps []Product
+	// estamos preenchendo a variavel "produtos" com a função read
+	err := r.db.Read(&ps)
+
+	// Se ocorrer um erro de leitura
+	if err != nil {
+		// retornamos o erro
+		return nil, err
+	}
+	// Senão, retornamos os produtos lidos
 	return ps, nil
 }
 
 func (r *repository) LastID() (int, error) {
-	return lastID, nil
+	var ps []Product
+	if err := r.db.Read(&ps); err != nil {
+		// Caso ocorrra um erro na leitura do arquivo,retorna o lastId como 0
+		return 0, err
+	}
+
+	// Caso ele leia o arquivo, mas o arquivo não tenha produtos, retorna o lastId como 0
+	if len(ps) == 0 {
+		return 0, nil
+	}
+
+	// Aqui obtemos o ultimo produto inserido
+	ultimoProduto := ps[len(ps)-1]
+	// Aqui retornamos o id do ultimo produto
+	return ultimoProduto.ID, nil
 }
 
 /* Store é o método que salvará as informações do produto,
 atribuirá o último ID à variável e retornará a entidade Product */
 
-func (r *repository) Store(id int, name, category string, count int, price float64) (Product, error) {
-	p := Product{id, name, category, count, price}
-	ps = append(ps, p)
-	lastID = p.ID
+// Aqui está a implementação antiga da repository
+// func (r *repository) Store(id int, name, category string, count int, price float64) (Product, error) {
+// 	p := Product{id, name, category, count, price}
+// 	ps = append(ps, p)
+// 	lastID = p.ID
+// 	return p, nil
+// }
+
+// Aqui está a nova implementação da repository
+
+// para gravar num arquivo, precisamos ler o arquivo para pegar os produtos
+// que já estavam nele, e adicionar mais um
+
+func (r *repository) Store(id int, name, productType string, count int, price float64) (Product, error) {
+	produtos := []Product{}
+
+	// estamos preenchendo a variavel "produtos" com a função read
+	r.db.Read(&produtos)
+
+	// Criamos um novo produto com as informações que a pessoa passou na função
+	p := Product{id, name, productType, count, price}
+	// Agora a variavel produtos tem os produtos que estavam no JSON, mais o produto criado
+	produtos = append(produtos, p)
+	if err := r.db.Write(produtos); err != nil {
+		return Product{}, err
+	}
 	return p, nil
+
 }
 
 // Criação do Método Update
