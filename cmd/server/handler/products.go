@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/anwardh/meliProject/internal/products"
@@ -35,7 +36,7 @@ passar a tarefa ao Service e devolver a resposta correspondente ao cliente */
 func (c *Product) GetAll() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.Request.Header.Get("token")
-		if token != "123456" {
+		if token != os.Getenv("TOKEN") {
 			ctx.JSON(http.StatusUnauthorized, gin.H{
 				"error": "token inválido",
 			})
@@ -57,7 +58,7 @@ func (c *Product) GetAll() gin.HandlerFunc {
 func (c *Product) Store() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.Request.Header.Get("token")
-		if token != "123456" {
+		if token != os.Getenv("TOKEN") {
 			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "token inválido"})
 			return
 		}
@@ -82,7 +83,7 @@ func (c *Product) Update() gin.HandlerFunc {
 
 		// Validação do Token
 		token := ctx.GetHeader("token")
-		if token != "123456" {
+		if token != os.Getenv("TOKEN") {
 			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "token inválido"})
 			return
 		}
@@ -145,7 +146,7 @@ func (c *Product) Update() gin.HandlerFunc {
 func (c *Product) UpdateName() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.GetHeader("token")
-		if token != "123456" {
+		if token != os.Getenv("TOKEN") {
 			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "token inválido"})
 			return
 		}
@@ -179,7 +180,7 @@ func (c *Product) UpdateName() gin.HandlerFunc {
 func (c *Product) Delete() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.GetHeader("token")
-		if token != "123456" {
+		if token != os.Getenv("TOKEN") {
 			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "token inválido"})
 			return
 		}
