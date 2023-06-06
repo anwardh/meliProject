@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/anwardh/meliProject/internal/products"
+	"github.com/anwardh/meliProject/pkg/web"
 	"github.com/gin-gonic/gin"
 )
 
@@ -37,20 +38,16 @@ func (c *Product) GetAll() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.Request.Header.Get("token")
 		if token != os.Getenv("TOKEN") {
-			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"error": "token inválido",
-			})
+			ctx.JSON(http.StatusUnauthorized, web.NewResponse(http.StatusUnauthorized, nil, "token inválido"))
 			return
 		}
 
 		p, err := c.service.GetAll()
 		if err != nil {
-			ctx.JSON(http.StatusNotFound, gin.H{
-				"error": err.Error(),
-			})
+			ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, "não há produtos armazenados"))
 			return
 		}
-		ctx.JSON(http.StatusOK, p)
+		ctx.JSON(http.StatusOK, web.NewResponse(http.StatusOK, p, ""))
 	}
 }
 
@@ -69,6 +66,29 @@ func (c *Product) Store() gin.HandlerFunc {
 			})
 			return
 		}
+
+		// Validação Semêntica dos Campos da nossa Requisição
+
+		if req.Name == "" {
+			ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, "o nome do produto é obrigatório"))
+			return
+		}
+
+		if req.Category == "" {
+			ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, "o nome do tipo é obrigatório"))
+			return
+		}
+
+		if req.Count == 0 {
+			ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, "a quantidade é obrigatória"))
+			return
+		}
+
+		if req.Price == 0 {
+			ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, "o preço do produto é obrigatório"))
+			return
+		}
+
 		p, err := c.service.Store(req.Name, req.Category, req.Count, req.Price)
 		if err != nil {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})

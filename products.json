@@ -1,1 +1,30 @@
-[]
+[
+  {
+    "id": 1,
+    "name": "",
+    "category": "óculos de sol",
+    "count": 1,
+    "price": 200
+  },
+  {
+    "id": 2,
+    "name": "ray ban",
+    "category": "óculos de sol",
+    "count": 1,
+    "price": 200
+  },
+  {
+    "id": 3,
+    "name": "chilli beans",
+    "category": "óculos de sol",
+    "count": 22,
+    "price": 250
+  },
+  {
+    "id": 4,
+    "name": "Conga",
+    "category": "calçados",
+    "count": 22,
+    "price": 100
+  }
+]
